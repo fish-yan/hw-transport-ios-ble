@@ -29,10 +29,16 @@ public class BleTransportConfiguration: NSObject {
         let nanoFTSWriteWithResponseCharacteristicUUID = "13d63400-2c97-6004-0002-4c6564676572"
         let nanoFTSWriteWithoutResponseCharacteristicUUID = "13d63400-2c97-6004-0003-4c6564676572"
         
+        let nanoFLEXServiceUUID = "13d63400-2c97-3004-0000-4c6564676572"
+        let nanoFLEXNotifyCharacteristicUUID = "13d63400-2c97-3004-0001-4c6564676572"
+        let nanoFLEXWriteWithResponseCharacteristicUUID = "13d63400-2c97-3004-0002-4c6564676572"
+        let nanoFLEXWriteWithoutResponseCharacteristicUUID = "13d63400-2c97-3004-0003-4c6564676572"
+        
         let nanoXService = BleService(serviceUUID: nanoXServiceUUID, notifyUUID: nanoXNotifyCharacteristicUUID, writeWithResponseUUID: nanoXWriteWithResponseCharacteristicUUID, writeWithoutResponseUUID: nanoXWriteWithoutResponseCharacteristicUUID)
         let nanoFTSService = BleService(serviceUUID: nanoFTSServiceUUID, notifyUUID: nanoFTSNotifyCharacteristicUUID, writeWithResponseUUID: nanoFTSWriteWithResponseCharacteristicUUID, writeWithoutResponseUUID: nanoFTSWriteWithoutResponseCharacteristicUUID)
+        let nanoFLEXService = BleService(serviceUUID: nanoFLEXServiceUUID, notifyUUID: nanoFLEXNotifyCharacteristicUUID, writeWithResponseUUID: nanoFLEXWriteWithResponseCharacteristicUUID, writeWithoutResponseUUID: nanoFLEXWriteWithoutResponseCharacteristicUUID)
         
-        return BleTransportConfiguration(services: [nanoXService, nanoFTSService])
+        return BleTransportConfiguration(services: [nanoXService, nanoFTSService, nanoFLEXService])
     }
     
     public func serviceMatching(serviceUUID: CBUUID) -> BleService? {

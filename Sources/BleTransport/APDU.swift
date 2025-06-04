@@ -12,7 +12,7 @@ public class APDU: Sendable, Receivable {
     public let data: Data                   /// The APDU data to send or receive.
     public var chunks: [Data] = []          /// The APDU data split into frames smaller than `mtuSize`
     
-    static var mtuSize: Int = 153           /// The maximum number of bytes (including the tag and frame index) we can send. This should be updated every time we connect to a new device.
+    static var mtuSize: Int = 255           /// The maximum number of bytes (including the tag and frame index) we can send. This should be updated every time we connect to a new device.
     
     public var isEmpty: Bool {
         chunks.isEmpty
