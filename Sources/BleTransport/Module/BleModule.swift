@@ -59,7 +59,7 @@ public class BleModule: NSObject {
     
     func start(delegate: BleModuleDelegate) {
         self.delegate = delegate
-        self.cbCentralManager = CBCentralManager(delegate: self, queue: nil)
+        self.cbCentralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: NSNumber(value: false)])
     }
     
     private func addOperation(_ operation: TaskOperation) {
