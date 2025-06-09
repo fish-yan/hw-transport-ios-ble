@@ -637,7 +637,7 @@ extension BleTransport: BleModuleDelegate {
     
     private func createConnectFunction(success: @escaping PeripheralResponse, failure: @escaping BleErrorResponse) -> ConnectFunction {
         return { (peripheral: PeripheralIdentifier) in
-            self.bleModule.connect(peripheralIdentifier: peripheral, timeout: .seconds(5)) { [weak self] result in
+            self.bleModule.connect(peripheralIdentifier: peripheral, timeout: .seconds(60)) { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let peripheral):
