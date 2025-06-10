@@ -376,7 +376,7 @@ extension BleTransport: BleModuleDelegate {
     
     fileprivate func scan(validationBlock predicate: @escaping (PeripheralInfo) -> Bool, connectFunction: @escaping ConnectFunction, failure: @escaping BleErrorResponse) {
         DispatchQueue.main.async {
-            let timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+            let timer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: false) { _ in
                 self.stopScanning()
                 failure(.connectError(description: "Couldn't find peripheral when scanning, timed out"))
             }
