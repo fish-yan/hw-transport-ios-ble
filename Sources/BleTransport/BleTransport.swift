@@ -40,7 +40,7 @@ extension BleTransport: BleModuleDelegate {
     private var disconnectedCallback: EmptyResponse? /// Once `disconnectCallback` is set it never becomes `nil` again so we can reuse it in methods where we reconnect to the peripheral blindly like `openApp/closeApp`
     private var connectFailure: ((BleTransportError)->())?
     
-    private var scanDuration: TimeInterval = 5.0 /// `scanDuration` will be overriden every time a value gets passed to `scan/create`
+    private var scanDuration: TimeInterval = 60.0 /// `scanDuration` will be overriden every time a value gets passed to `scan/create`
     
     private var peripheralsServicesTuple = [PeripheralInfo]()
     private var connectedPeripheral: PeripheralIdentifier?
@@ -376,14 +376,8 @@ extension BleTransport: BleModuleDelegate {
     
     fileprivate func scan(validationBlock predicate: @escaping (PeripheralInfo) -> Bool, connectFunction: @escaping ConnectFunction, failure: @escaping BleErrorResponse) {
         DispatchQueue.main.async {
-            let timer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: false) { _ in
-                self.stopScanning()
-                failure(.connectError(description: "Couldn't find peripheral when scanning, timed out"))
-            }
-            
             self.scan(duration: self.scanDuration) { [weak self] discoveries in
                 if let p = discoveries.first(where: { predicate($0) }) {
-                    timer.invalidate()
                     connectFunction(p.peripheral)
                     self?.stopScanning()
                 }
