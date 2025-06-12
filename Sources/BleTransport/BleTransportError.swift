@@ -21,6 +21,7 @@ public enum BleTransportError: LocalizedError {
     case scanError(description: String)
     case pairingError(description: String)
     case lowerLevelError(description: String)
+    case timeout(description: String)
     
     public var errorDescription: String? {
         switch self {
@@ -49,6 +50,8 @@ public enum BleTransportError: LocalizedError {
             return "Pairing error: \(description)"
         case .lowerLevelError(let description):
             return "Lower level error: \(description)"
+        case .timeout(let description):
+            return "timeout: \(description)"
         }
     }
     
@@ -80,6 +83,8 @@ public enum BleTransportError: LocalizedError {
             return "PairError"
         case .lowerLevelError(_):
             return "LowerLevelError"
+        case .timeout:
+            return "Timeout"
         }
     }
 }
@@ -110,6 +115,8 @@ extension BleTransportError: Equatable {
         case (.pairingError(let lhsDescription), .pairingError(let rhsDescription)):
             return lhsDescription == rhsDescription
         case (.lowerLevelError(let lhsDescription), .lowerLevelError(let rhsDescription)):
+            return lhsDescription == rhsDescription
+        case (.timeout(let lhsDescription), .timeout(let rhsDescription)):
             return lhsDescription == rhsDescription
         default:
             return false

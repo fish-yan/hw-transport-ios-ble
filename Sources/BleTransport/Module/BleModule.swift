@@ -22,6 +22,8 @@ enum BleModuleError: LocalizedError {
     }
 }
 
+let longTimeoutInterval: TimeInterval = 600
+
 protocol BleModuleDelegate: AnyObject {
     func bluetoothAvailable(_ available: Bool)
     func bluetoothState(_ state: CBManagerState)

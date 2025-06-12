@@ -54,6 +54,9 @@ public class Connect: TaskOperation {
         self.timeout = timeout
         self.callback = callback
         self.peripheral = peripheral
+        DispatchQueue.main.asyncAfter(deadline: .now() + longTimeoutInterval) {
+            self.timedOut()
+        }
     }
     
     func start() {

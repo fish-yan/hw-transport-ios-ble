@@ -37,6 +37,9 @@ class Listen: TaskOperation {
         self.peripheral = peripheral
         self.value = value
         self.callback = callback
+        DispatchQueue.main.asyncAfter(deadline: .now() + longTimeoutInterval) {
+            self.complete(withError: BleTransportError.timeout(description: "listen timeout"))
+        }
     }
     
     func start() {

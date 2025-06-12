@@ -36,6 +36,9 @@ class DiscoverService: TaskOperation {
         self.serviceIdentifier = serviceIdentifier
         self.peripheral = peripheral
         self.callback = callback
+        DispatchQueue.main.asyncAfter(deadline: .now() + longTimeoutInterval) {
+            self.complete(withError: BleTransportError.timeout(description: "discover timeout"))
+        }
     }
     
     func start() {

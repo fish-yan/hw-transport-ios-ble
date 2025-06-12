@@ -38,6 +38,9 @@ class DiscoverCharacteristic: TaskOperation {
         self.characteristicIdentifier = characteristicIdentifier
         self.peripheral = peripheral
         self.callback = callback
+        DispatchQueue.main.asyncAfter(deadline: .now() + longTimeoutInterval) {
+            self.complete(withError: BleTransportError.timeout(description: "discover characteristic timeout"))
+        }
     }
     
     func start() {

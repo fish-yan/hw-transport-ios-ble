@@ -27,6 +27,9 @@ class Disconnect: TaskOperation {
         self.manager = manager
         
         self.callback = callback
+        DispatchQueue.main.asyncAfter(deadline: .now() + longTimeoutInterval) {
+            self.fail(BleTransportError.timeout(description: "disconnect timeout"))
+        }
     }
     
     func start() {

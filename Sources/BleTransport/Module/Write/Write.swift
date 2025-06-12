@@ -33,6 +33,9 @@ class Write<T: Sendable>: TaskOperation {
         self.value = value
         self.writeType = writeType
         self.callback = callback
+        DispatchQueue.main.asyncAfter(deadline: .now() + longTimeoutInterval) {
+            self.complete(withError: BleTransportError.timeout(description: "write timeout"))
+        }
     }
     
     func start() {
