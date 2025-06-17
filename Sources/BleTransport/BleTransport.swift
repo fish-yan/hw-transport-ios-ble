@@ -39,9 +39,7 @@ extension BleTransport: BleModuleDelegate {
     private let configuration: BleTransportConfiguration
     private var disconnectedCallback: EmptyResponse? /// Once `disconnectCallback` is set it never becomes `nil` again so we can reuse it in methods where we reconnect to the peripheral blindly like `openApp/closeApp`
     private var connectFailure: ((BleTransportError)->())?
-    
-    private var scanDuration: TimeInterval = 60.0 /// `scanDuration` will be overriden every time a value gets passed to `scan/create`
-    
+        
     private var peripheralsServicesTuple = [PeripheralInfo]()
     private var connectedPeripheral: PeripheralIdentifier?
     private var bluetoothAvailabilityCompletion: ((Bool)->())?
@@ -129,9 +127,7 @@ extension BleTransport: BleModuleDelegate {
     public func create(scanDuration: TimeInterval, disconnectedCallback: EmptyResponse?, success: @escaping PeripheralResponse, failure: @escaping BleErrorResponse) {
         
         guard isBluetoothAvailable else { failure(.bluetoothNotAvailable); return }
-        
-        self.scanDuration = scanDuration
-        
+                
         var connecting = false
         
         func attemptConnecting(peripheralInfo: PeripheralInfo) {
@@ -159,7 +155,12 @@ extension BleTransport: BleModuleDelegate {
                 callback(.failure(.pendingActionOnDevice))
                 return
             }
-            
+            DispatchQueue.main.asyncAfter(deadline: .now() + exchangeTimoutInterval) {
+                self.isExchanging = false
+                self.exchangeCallback?(.failure(.timeout(description: "exchange timeout")))
+                self.exchangeCallback = nil
+                print("error", "->", "exchange timeout")
+            }
             print("Sending", "->", apduToSend.data.hexEncodedString())
             self.exchangeCallback = callback
             self.isExchanging = true
@@ -376,11 +377,11 @@ extension BleTransport: BleModuleDelegate {
     
     fileprivate func scan(validationBlock predicate: @escaping (PeripheralInfo) -> Bool, connectFunction: @escaping ConnectFunction, failure: @escaping BleErrorResponse) {
         DispatchQueue.main.async {
-            DispatchQueue.main.asyncAfter(deadline: .now() + self.scanDuration) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + timeoutInterval) {
                 self.stopScanning()
                 failure(.connectError(description: "Couldn't find peripheral when scanning because of error: timeout"))
             }
-            self.scan(duration: self.scanDuration) { [weak self] discoveries in
+            self.scan(duration: timeoutInterval) { [weak self] discoveries in
                 if let p = discoveries.first(where: { predicate($0) }) {
                     connectFunction(p.peripheral)
                     self?.stopScanning()
@@ -635,7 +636,7 @@ extension BleTransport: BleModuleDelegate {
     
     private func createConnectFunction(success: @escaping PeripheralResponse, failure: @escaping BleErrorResponse) -> ConnectFunction {
         return { (peripheral: PeripheralIdentifier) in
-            self.bleModule.connect(peripheralIdentifier: peripheral, timeout: .seconds(60)) { [weak self] result in
+            self.bleModule.connect(peripheralIdentifier: peripheral, timeout: .seconds(timeoutInterval)) { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let peripheral):

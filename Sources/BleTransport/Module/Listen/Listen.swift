@@ -50,6 +50,9 @@ class Listen: TaskOperation {
             complete(withError: DiscoverCharacteristicError.missingCharacteristic(characteristicIdentifier))
             return
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeoutInterval) {
+            self.complete(withError: BleTransportError.timeout(description: "listen timeout"))
+        }
         
         peripheral.setNotifyValue(value, for: characteristic)
         

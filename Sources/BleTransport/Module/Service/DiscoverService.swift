@@ -45,6 +45,9 @@ class DiscoverService: TaskOperation {
         if peripheral.service(with: serviceIdentifier.uuid) != nil {
             complete(withError: nil)
         } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + timeoutInterval) {
+                self.complete(withError: BleTransportError.timeout(description: "discover timeout"))
+            }
             peripheral.discoverServices([serviceIdentifier.uuid])
         }
     }

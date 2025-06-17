@@ -33,6 +33,9 @@ class Disconnect: TaskOperation {
     }
     
     func start() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeoutInterval) {
+            self.fail(BleTransportError.timeout(description: "disconnect timeout"))
+        }
         manager.cancelPeripheralConnection(peripheral)
     }
     
