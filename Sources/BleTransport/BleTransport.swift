@@ -62,6 +62,10 @@ extension BleTransport: BleModuleDelegate {
     /// Infer MTU
     private var mtuWaitingForCallback: PeripheralResponse?
     
+    private var scanWorkItem: DispatchWorkItem?
+    
+    private var exchangeWorkItem: DispatchWorkItem?
+    
     @objc
     public var isBluetoothAvailable: Bool {
         bleModule.isBluetoothAvailable
@@ -155,11 +159,15 @@ extension BleTransport: BleModuleDelegate {
                 callback(.failure(.pendingActionOnDevice))
                 return
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + exchangeTimoutInterval) {
+            self.exchangeWorkItem?.cancel()
+            self.exchangeWorkItem = DispatchWorkItem(block: {
                 self.isExchanging = false
                 self.exchangeCallback?(.failure(.timeout(description: "exchange timeout")))
                 self.exchangeCallback = nil
                 print("error", "->", "exchange timeout")
+            })
+            if let exchangeWorkItem = self.exchangeWorkItem {
+                DispatchQueue.main.asyncAfter(deadline: .now() + exchangeTimoutInterval, execute: exchangeWorkItem)
             }
             print("Sending", "->", apduToSend.data.hexEncodedString())
             self.exchangeCallback = callback
@@ -377,9 +385,13 @@ extension BleTransport: BleModuleDelegate {
     
     fileprivate func scan(validationBlock predicate: @escaping (PeripheralInfo) -> Bool, connectFunction: @escaping ConnectFunction, failure: @escaping BleErrorResponse) {
         DispatchQueue.main.async {
-            DispatchQueue.main.asyncAfter(deadline: .now() + timeoutInterval) {
+            self.scanWorkItem?.cancel()
+            self.scanWorkItem = DispatchWorkItem {
                 self.stopScanning()
                 failure(.connectError(description: "Couldn't find peripheral when scanning because of error: timeout"))
+            }
+            if let scanWorkItem = self.scanWorkItem {
+                DispatchQueue.main.asyncAfter(deadline: .now() + timeoutInterval, execute: scanWorkItem)
             }
             self.scan(duration: timeoutInterval) { [weak self] discoveries in
                 if let p = discoveries.first(where: { predicate($0) }) {
