@@ -101,6 +101,10 @@ public protocol BleTransportProtocol {
     /// - Parameter completion: Callback called when the peripheral disconnects. This will be called only once.
     func notifyDisconnected(completion: @escaping EmptyResponse)
     
+    /// Get notified once when the peripheral disconnects
+    /// - Parameter completion: Callback called when the peripheral disconnects. This will be called only once.
+    func notifyMaybeDisconnected(completion: @escaping EmptyResponse)
+    
     
     // MARK: - Convenience methods
     

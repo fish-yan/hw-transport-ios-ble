@@ -292,6 +292,18 @@ extension BleTransport: BleModuleDelegate {
         bluetoothStateCompletion = completion
     }
     
+    public func notifyMaybeDisconnected(completion: @escaping EmptyResponse) {
+        if !isConnected {
+            completion()
+        } else {
+            notifyDisconnectedCompletion = completion
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.notifyDisconnectedCompletion?()
+                self.notifyDisconnectedCompletion = nil
+            }
+        }
+    }
+    
     public func notifyDisconnected(completion: @escaping EmptyResponse) {
         if !isConnected {
             completion()
@@ -569,11 +581,15 @@ extension BleTransport: BleModuleDelegate {
                 if let error = self.parseStatus(response: response, errorCodes: errorCodes) {
                     failure(error)
                 } else {
-                    self.notifyDisconnected {
-                        self.connect(toPeripheralID: connectedPeripheral, disconnectedCallback: disconnectedCallback) { _ in
+                    self.notifyMaybeDisconnected {
+                        if self.isConnected {
                             success()
-                        } failure: { error in
-                            failure(error)
+                        } else {
+                            self.connect(toPeripheralID: connectedPeripheral, disconnectedCallback: disconnectedCallback) { _ in
+                                success()
+                            } failure: { error in
+                                failure(error)
+                            }
                         }
                     }
                 }
@@ -602,11 +618,15 @@ extension BleTransport: BleModuleDelegate {
             
             switch result {
             case .success(_):
-                self.notifyDisconnected {
-                    self.connect(toPeripheralID: connectedPeripheral, disconnectedCallback: disconnectedCallback) { _ in
+                self.notifyMaybeDisconnected {
+                    if self.isConnected {
                         success()
-                    } failure: { error in
-                        failure(error)
+                    } else {
+                        self.connect(toPeripheralID: connectedPeripheral, disconnectedCallback: disconnectedCallback) { _ in
+                            success()
+                        } failure: { error in
+                            failure(error)
+                        }
                     }
                 }
             case .failure(let error):
